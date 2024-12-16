@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hadik</title>
+    <style>
+        body {
+            background-color: blueviolet;
+            text-align: center;
+        }
+        canvas {border: 20px solid rgb(195, 195, 196)
+        } 
+
+        h1 {
+            font-family: Arial, Helvetica, sans-serif;
+            font-weight: bold;
+        }
+        h2 {
+            font-family: Arial, Helvetica, sans-serif;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <canvas width="800" height="800"></canvas>
+    <h2> Moneymakers</h2>
+    <h1> 0</h1>
+
+    <script>
+        //listeners - funkcia pocuvania, ktora ked zaznamena klavesu, pusti funkciu keyPush
+        document.addEventListener('keydown', keyPush)
+
+        //canvas
+        const canvas = document.querySelector("canvas");
+        const title = document.querySelector("h1");
+        const title2 = document.querySelector("h2");
+        const ctx = canvas.getContext("2d");
+
+        // Načítanie obrázka
+        const snakeImage = new Image();
+        snakeImage.src = 'kubik.png';
+
+        // Načítanie obrázka
+        const snakeGod = new Image();
+        snakeGod.src = 'baran.png';
+        
+        //player definujeme velkost,jeho pozicie
+        const snakeSize = 50;
+        let snakeSpeed = snakeSize;
+        let snakePosX = 0;
+        let snakePosY = canvas.height / 2;
+
+        //game
+        let gameRunning = true;
+        const fps = 15;
+        let score = 0;
+        const titleCountX = canvas.width / snakeSize;
+        const titleCountY =canvas.height / snakeSize;
+
+
+        //chvost
+        let tail = [];
+        let snakeLenght = 1;
+
+        //food
+        let velocityX = 1;
+        let velocityY = 0;
+
+        //snakeImage.onload = () => {
+        // Keď je obrázok načítaný, spusti hru
+         //gameLoop();
+        //};
+
+        //loop - funkcie
+        function gameLoop() {
+            if ( gameRunning ) {
+            drawStuff(); //vykreslime grafiku
+            moveStuff(); //vykreslime pohyb)
+            setTimeout(gameLoop, 1000 / fps); // vykreslenie sceny
+        }
+        }
+            resetFood (); //vykreslime nahodne jedlo
+            gameLoop();     //spustime hru
+
+        
+        //funkcia kreslenia
+        function drawStuff(){
+
+        // vykreslenie backgroundu
+        rectangle('yellow',0,0,canvas.width,canvas.height);
+
+        //vykreslenie dlazdic
+        drawGrid ();
+
+        //vykreslenie jedla
+        ctx.drawImage(snakeImage,fooodPosX,fooodPosY,snakeSize,snakeSize);
+
+        //vykreslenie chvosta
+        tail.forEach((snakePart) =>
+        rectangle("#555", snakePart.x, snakePart.y, snakeSize, snakeSize)
+        );
+
+        //vykreslenie snake
+        ctx.drawImage(snakeGod,snakePosX,snakePosY,snakeSize,snakeSize);
+    }
+        //fukncia rectangle
+        function rectangle(color, x, y, width, height){
+            ctx.fillStyle = color,
+            ctx.fillRect(x,y,width,height);
+        }
+
+        //funkcia pohybu
+        function moveStuff(){
+            snakePosX += snakeSpeed * velocityX;
+            snakePosY += snakeSpeed * velocityY;
+
+            //kolizia so stebnou
+            if (snakePosX > canvas.width - snakeSize){
+                snakePosX = 0;
+            }
+            if ( snakePosX < 0) {
+                snakePosX = canvas.width;
+            }
+            if ( snakePosY > canvas.height - snakeSize) {
+                snakePosY = 0;
+            }
+            if ( snakePosY < 0) {
+                snakePosY = canvas.height;
+            }
+
+            // Game Over
+            tail.forEach((snakePart) => {
+                if (snakePosX === snakePart.x && snakePosY === snakePart.y) {
+                    gameOver ()
+            }
+        });
+
+            // tail
+            tail.push({x:snakePosX, y: snakePosY});
+
+            //zabudni posledne casti hada
+            tail = tail.slice(-1 * snakeLenght);
+            
+            //kolizia s jedlom pomocou Math - nahdone cislo
+            if (fooodPosX === snakePosX && fooodPosY === snakePosY) {
+                score++
+                title.textContent = score;
+                snakeLenght++;
+                resetFood ();
+            }
+
+        }
+    //fukcia keyPush - mackanie klaves
+    function keyPush (event) {
+        switch(event.key){
+                case "ArrowUp" :
+                    if (velocityY !== 1) { // zabranim hadikovy spatny chod
+                velocityX = 0;
+                velocityY = -1;
+                    }
+                break;
+                case "ArrowDown" :
+                    if (velocityY !== -1) { // zabranim hadikovy spatny chod
+                velocityX = 0;
+                velocityY = 1;
+                    }
+                break;
+                case "ArrowLeft" :
+                    if (velocityX !== 1) { // zabranim hadikovy spatny chod
+                velocityX = -1;
+                velocityY = 0;
+                    }
+                break;
+                case "ArrowRight" :
+                    if (velocityX !== -1) { // zabranim hadikovy spatny chod
+                velocityX = 1;
+                velocityY = 0;
+                    }
+                break;
+
+                default:
+                // restart hry
+                if (! gameRunning) location.reload(); //refresneme okno
+                break
+        }
+    }
+        function drawGrid (){
+            for (let i = 0; i < titleCountX; i++) {
+                for (let j = 0; j < titleCountY; j++) {
+                    rectangle (
+                        "blue", 
+                        snakeSize * i,
+                        snakeSize * j,
+                        snakeSize - 1,
+                        snakeSize - 1
+                );
+            }
+        }
+    }
+
+    function resetFood (){
+        //GameOver
+        if (snakeLenght === titleCountX * titleCountY) {
+            gameOver ()
+        }
+                fooodPosX = Math.floor(Math.random() * titleCountX) * snakeSize;
+                fooodPosY = Math.floor(Math.random() * titleCountY) * snakeSize;
+
+                if (fooodPosX === snakePosX && fooodPosY === snakePosY) {
+                    resetFood () // ak je jedlo na tele resetuj poziciu
+                }
+    }
+
+    function gameOver () {
+        title.innerHTML = " $ " + (score) + " $ ";
+                gameRunning = false;
+    }
+
+        </script>
+    </body>
+</html>
