@@ -6,7 +6,7 @@
     <title>Hadik</title>
     <style>
         body {
-            background-color: rgb(253, 181, 0);
+            background-color: #fdb500;
             text-align: center;
         }
         canvas {
@@ -22,26 +22,29 @@
         //listener
         document.addEventListener("keydown",keyPush);
 
-        //cnvas
+        //canvas
         const canvas = document.querySelector("canvas");
         const ctx = canvas.getContext("2d");
 
-        //player
+        //premenne 
         const snakeSize = 50;
-        let snakeSpeed = 5;
+        let snakeSpeed = 50;
         let snakePosX = 0;
         let snakePosY = canvas.height /2 - snakeSize /2
 
         let velocityX = 0;
         let velocityY = 0;
 
+        let titleCountX = canvas.width / snakeSize;
+        let titleCountY = canvas.height / snakeSize;
+
         //loop
         function gameLoop (){   
             drawStuff ()
             moveStuff ()
             
-            
-        requestAnimationFrame (gameLoop);
+            //nahradime requestAnimationFrame setTimom
+        setTimeout(gameLoop, 1000 / 15 );
          }
         gameLoop();
 
@@ -71,7 +74,10 @@
         function drawStuff ()  {
 
             //biely stvorec
-            rectangle ("white" , 0 , 0 , canvas.width , canvas.height);
+            rectangle ("#fdb500" , 0 , 0 , canvas.width , canvas.height);
+
+            // nakresli mriezku Grid
+            drawGrid ()
             
             //cierny stvorec
             rectangle ("black", snakePosX , snakePosY , snakeSize , snakeSize);
@@ -110,6 +116,17 @@
                         velocityX = + 1;
                         velocityY = 0; }
                 break;
+            }
+        }
+
+        // Grid
+        function drawGrid () {
+            for ( let i = 0; i < titleCountX ; i++ ){
+                for ( let j = 0; j < titleCountY; j++) {
+                    rectangle ("white", snakeSize * i, snakeSize *j
+                        , snakeSize -1 , snakeSize -1);
+                }
+
             }
         }
     </script>
