@@ -38,19 +38,26 @@
         let titleCountX = canvas.width / snakeSize;
         let titleCountY = canvas.height / snakeSize;
 
+        let foodPosX = 400;
+        let foodPosY = 100;
+
         //loop
         function gameLoop (){   
             drawStuff ()
             moveStuff ()
             
-            //nahradime requestAnimationFrame setTimom
+        //nahradime requestAnimationFrame setTimom
         setTimeout(gameLoop, 1000 / 15 );
          }
+
+         resetFoot ();
         gameLoop();
 
         function moveStuff () {
             snakePosX += snakeSpeed * velocityX;
             snakePosY += snakeSpeed * velocityY;
+
+            // kolizia so stenou
 
             if ( snakePosX > canvas.width - snakeSize) {
                 snakePosX = 0;
@@ -69,6 +76,12 @@
                 snakePosY = canvas.height;
             }
 
+            // kolizia s jedlom
+
+            if ( snakePosX == foodPosX && snakePosY == foodPosY){
+                resetFoot ()
+            }
+
         }
 
         function drawStuff ()  {
@@ -82,6 +95,8 @@
             //cierny stvorec
             rectangle ("black", snakePosX , snakePosY , snakeSize , snakeSize);
         
+            //foot
+            rectangle ("green", foodPosX , foodPosY , snakeSize , snakeSize);
         
         }
         // funkcia stvoruholnik
@@ -128,6 +143,12 @@
                 }
 
             }
+        }
+
+        // reset foot
+        function resetFoot () {
+            foodPosX = Math.floor (Math.random() * titleCountX) * snakeSize;
+                foodPosY = Math.floor (Math.random() * titleCountY) * snakeSize;
         }
     </script>
 </body>
