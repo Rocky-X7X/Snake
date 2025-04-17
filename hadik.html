@@ -12,10 +12,15 @@
         canvas {
             border: 10px solid #fd0000;
         }
+        h1 {
+            font-family: 'Courier New', Courier, monospace;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
     <canvas width="600" height="600"></canvas>
+    <h1> Score </h1>
 
     <script>
 
@@ -24,33 +29,42 @@
 
         //canvas
         const canvas = document.querySelector("canvas");
+        const title = document.querySelector("h1");
         const ctx = canvas.getContext("2d");
 
-        //premenne 
+        //game
+        const fps = 15;
         const snakeSize = 50;
-        let snakeSpeed = 50;
-        let snakePosX = 0;
-        let snakePosY = canvas.height /2 
-
-        let velocityX = 0;
-        let velocityY = 0;
-
         let titleCountX = canvas.width / snakeSize;
         let titleCountY = canvas.height / snakeSize;
 
-        let foodPosX = 400;
-        let foodPosY = 100;
+        let score = 0;
 
+        //player
+        let snakeSpeed = snakeSize;
+        let snakePosX = 0;
+        let snakePosY = canvas.height /2 ;
+
+        let velocityX = 0;
+        let velocityY = 0;
+        let snakeLenght = 1;
+
+        let tail = [];
+
+        //food     
+        let foodPosX = 0;
+        let foodPosY = 0;
+   
         //loop
         function gameLoop (){   
             drawStuff ()
             moveStuff ()
             
         //nahradime requestAnimationFrame setTimom
-        setTimeout(gameLoop, 1000 / 15 );
+        setTimeout(gameLoop, 1000 / fps );
          }
 
-         resetFoot ();
+        resetFood ();
         gameLoop();
 
         function moveStuff () {
@@ -76,12 +90,19 @@
                 snakePosY = canvas.height;
             }
 
+            
+            // tail
+			tail.push({ x: snakePosX, y: snakePosY });
+
+            //forget earliest parts of snake
+            tail = tail.slice (-1 * snakeLenght);
+
             // kolizia s jedlom
-
-            if ( snakePosX == foodPosX && snakePosY == foodPosY){
-                resetFoot ()
+            if ( snakePosX === foodPosX && snakePosY === foodPosY){
+                title.textContent = ++score;
+                snakeLenght++;
+                resetFood ();
             }
-
         }
 
         function drawStuff ()  {
@@ -91,13 +112,18 @@
 
             // nakresli mriezku Grid
             drawGrid ()
-            
+
+            //food
+            rectangle ("green", foodPosX , foodPosY , snakeSize , snakeSize);
+
+            //tail
+            tail.forEach ((snakePart) =>
+            rectangle ("#555", snakePart.x, snakePart.y, snakeSize,snakeSize)
+            );
+
             //cierny stvorec
             rectangle ("black", snakePosX , snakePosY , snakeSize , snakeSize);
-        
-            //foot
-            rectangle ("green", foodPosX , foodPosY , snakeSize , snakeSize);
-        
+
         }
         // funkcia stvoruholnik
         function rectangle (color, x , y , width , height) {
@@ -145,8 +171,8 @@
             }
         }
 
-        // reset foot
-        function resetFoot () {
+        // reset food
+        function resetFood () {
             foodPosX = Math.floor (Math.random() * titleCountX) * snakeSize;
                 foodPosY = Math.floor (Math.random() * titleCountY) * snakeSize;
         }
