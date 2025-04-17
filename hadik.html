@@ -192,8 +192,23 @@
 
         // reset food
         function resetFood () {
+
+            if ( snakeLenght === titleCountX * titleCountY) {
+                gameOver ();
+            }
+            
             foodPosX = Math.floor (Math.random() * titleCountX) * snakeSize;
-                foodPosY = Math.floor (Math.random() * titleCountY) * snakeSize;
+            foodPosY = Math.floor (Math.random() * titleCountY) * snakeSize;
+            
+            //ked sa jedlo zobrazi na hadej hlave
+            if (foodPosX === snakePosX && foodPosY === snakePosY) {
+                resetFood ();
+            }
+
+            //ked sa jedlo zobrazi na hadej hlave
+            if ( tail.some(snakePart=> snakePart.x === foodPosX && snakePart.y === foodPosY )) {
+                resetFood ();
+            }
         }
 
         // game over
