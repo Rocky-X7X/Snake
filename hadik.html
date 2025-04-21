@@ -2,15 +2,16 @@
 <html lang="sk">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=?, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hadik</title>
     <style>
         body {
-            background-color: #fdb500;
+            background-color: #2a1cc7;
             text-align: center;
+            position: relative;
         }
         canvas {
-            border: 10px solid #fd0000;
+            border: 17px solid #fd0000;
         }
         h1 {
             font-family: 'Courier New', Courier, monospace;
@@ -22,21 +23,75 @@
     </style>
 </head>
 <body>
+
+    <div style="position: absolute; top: 30%; left: 16.665%; /* Polovica z 33.33% */ transform: translateX(-50%);">
+        <div style="text-align: center;">
+            <h2>Vyber si vzhľad hada:</h2>
+            <div id="snakeSkinSelector" style="display: flex; gap: 10px; justify-content: center;">
+                <img src="baran.png" alt="Čierny had" style="cursor: pointer; width: 50px; height: 50px; border: 2px solid transparent;">
+                <img src="maria.png" alt="Zelený had"  style="cursor: pointer; width: 50px; height: 50px; border: 2px solid transparent;">
+                <img src="money.png" alt="Modrý had"  style="cursor: pointer; width: 50px; height: 50px; border: 2px solid transparent;">
+            </div>
+            <button id="startGameButton" style="margin-top: 10px;">Spustiť hru</button>
+        </div>
+    </div>
+
     <canvas width="600" height="600"></canvas>
     <h1> Score </h1>
 
     <script>
 
-        //listener
+        //listeners
         document.addEventListener("keydown",keyPush);
+        
 
         //canvas
         const canvas = document.querySelector("canvas");
         const title = document.querySelector("h1");
         const ctx = canvas.getContext("2d");
 
+        document.addEventListener('DOMContentLoaded', () => {
+    console.log("DOMContentLoaded sa spustilo");
+    const snakeSkinSelector = document.getElementById('snakeSkinSelector');
+    const snakeSkinImages = snakeSkinSelector.querySelectorAll('img');
+
+    snakeSkinImages.forEach(img => {
+        const skinName = img.dataset.skin;
+        snakeHeadImages[skinName] = new Image();
+        snakeHeadImages[skinName].src = skinName + '.png'; // Predpokladajme, že máš .png
+
+        // Pridaj poslucháča na udalosť 'load'
+        snakeHeadImages[skinName].onload = () => {
+            console.log(`Obrázok pre ${skinName} načítaný.`);
+            // Tu by si mohol prípadne spustiť prvotné vykreslenie hry, ak chceš
+        };
+
+        snakeHeadImages[skinName].onerror = () => {
+            console.error(`Chyba pri načítavaní obrázka pre ${skinName}!`);
+        };
+
+        img.addEventListener('click', () => {
+            currentSnakeSkin = skinName;
+            console.log(`Zmenený vzhľad na: ${currentSnakeSkin}`);
+            snakeSkinImages.forEach(otherImg => otherImg.style.border = '2px solid transparent');
+            img.style.border = '2px solid red';
+        });
+    });
+
+    // Načítaj aj pozadie s poslucháčmi (pre istotu)
+    backgroundImage.onload = () => {
+        console.log("Pozadie načítané.");
+    };
+    backgroundImage.onerror = () => {
+        console.error("Chyba pri načítavaní pozadia!");
+    };
+});
+
+        const backgroundImage = new Image();
+        backgroundImage.src = 'kubik.png';
+
         //game
-        let gameIsRuning = true ;
+        let gameIsRuning = false ;
         const fps = 15;
         const snakeSize = 50;
         let titleCountX = canvas.width / snakeSize;
@@ -45,19 +100,44 @@
         let score = 0;
 
         //player
+                let currentSnakeSkin = 'baran.png'; // Predvolený vzhľad
+        const snakeHeadImages = {};
+
+        // Načítaj predvolený obrázok hneď na začiatku a spusti hru po jeho načítaní
+snakeHeadImages['baran.png'] = new Image();
+snakeHeadImages['baran.png'].onload = () => {
+    console.log("Predvolený obrázok baran.png načítaný. Spúšťam hru.");
+    gameIsRuning = true;
+    resetFood();
+    gameLoop();
+};
+snakeHeadImages['baran.png'].src = 'baran.png';
+
         let snakeSpeed = snakeSize;
         let snakePosX = 0;
         let snakePosY = canvas.height /2 ;
 
         let velocityX = 1;
         let velocityY = 0;
-        let snakeLenght = 0;
+        let snakeLenght = 1;
 
         let tail = [];
 
         //food     
         let foodPosX = 0;
         let foodPosY = 0;
+
+        const startGameButton = document.getElementById('startGameButton');
+
+        //zapne hru po stlaceni tlacidla
+        startGameButton.addEventListener('click', () => {
+            if (!gameIsRuning) {
+        console.log("Kliknuté na tlačidlo Spustiť hru. Hra sa spustí po načítaní predvoleného obrázka.");
+        gameIsRuning = true; // Nastavíme na true, aby sa pri opakovanom kliknutí už nič nedejalo
+        resetFood(); // Resetujeme jedlo hneď
+        // gameLoop(); // TOTO UŽ NETREBA VOLAŤ TU
+        }
+        });
    
         //loop
         function gameLoop (){ 
@@ -71,8 +151,6 @@
             }
          }
 
-        resetFood ();
-        gameLoop();
 
         function moveStuff () {
             snakePosX += snakeSpeed * velocityX;
@@ -128,15 +206,19 @@
             drawGrid ()
 
             //food
-            rectangle ("green", foodPosX , foodPosY , snakeSize , snakeSize);
+            ctx.drawImage(backgroundImage, foodPosX , foodPosY , snakeSize , snakeSize);
+
+            //cierny stvorec
+            if (currentSnakeSkin === 'black') {
+              rectangle ("black", snakePosX , snakePosY , snakeSize , snakeSize);
+             } else if (snakeHeadImages[currentSnakeSkin]) {
+               ctx.drawImage(snakeHeadImages[currentSnakeSkin], snakePosX , snakePosY , snakeSize , snakeSize);
+            }
 
             //tail
             tail.forEach ((snakePart) =>
-            rectangle ("#555", snakePart.x, snakePart.y, snakeSize,snakeSize)
+            rectangle ("black", snakePart.x, snakePart.y, snakeSize,snakeSize)
             );
-
-            //cierny stvorec
-            rectangle ("black", snakePosX , snakePosY , snakeSize , snakeSize);
 
         }
         // funkcia stvoruholnik
